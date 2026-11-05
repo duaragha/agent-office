@@ -1,0 +1,15 @@
+# Runs the feeder as a user service. Put OFFICE_HUB_URL and OFFICE_TOKEN in
+# ~/.config/agent-office/feeder.env, copy this to ~/.config/systemd/user/, set
+# the path below, then: systemctl --user enable --now agent-office-feeder
+[Unit]
+Description=Agent office feeder
+
+[Service]
+ExecStart=/usr/bin/env python3 -u %h/agent-office/feeder/feeder.py
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+Restart=always
+RestartSec=10
+Nice=10
+
+[Install]
+WantedBy=default.target

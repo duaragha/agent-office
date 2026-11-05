@@ -1,0 +1,28 @@
+# Agent office hub. Feeders on each machine with agents push to it.
+name: agent-office
+
+services:
+  office-hub:
+    build: .
+    image: agent-office:local
+    restart: unless-stopped
+    env_file:
+      - path: ./office.env   # OFFICE_TOKEN, OFFICE_ALLOWED_ORIGINS (see office.env.example)
+        required: true
+    environment:
+      OFFICE_HOST: 0.0.0.0
+      OFFICE_PORT: "8825"
+      OFFICE_BASE_PATH: /office
+      OFFICE_DATA: /data
+    volumes: ["./data:/data"]
+    ports: ["${OFFICE_BIND:-127.0.0.1}:8835:8825"]
+    mem_limit: 256m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8825/office/api/version').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
